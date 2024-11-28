@@ -1,18 +1,23 @@
 const express = require('express');
 const router = express.Router();
+const authMiddleware = require('../middleware/auth');
+const {
+  getAllBlogs,
+  createBlog,
+  updateBlog,
+  deleteBlog
+} = require('../controllers/blogController');
 
-router.get('/', (req, res) => {
-  res.status(200).json({
-    message: 'Blog routes are working',
-    blogs: []
-  });
-});
+// Get all blogs (can be filtered by status)
+router.get('/', getAllBlogs);
 
-router.post('/', (req, res) => {
-  res.status(201).json({
-    message: 'Blog creation route working',
-    success: true
-  });
-});
+// Create a new blog (protected route)
+router.post('/', authMiddleware, createBlog);
+
+// Update a blog (protected route)
+router.put('/:id', authMiddleware, updateBlog);
+
+// Delete a blog (protected route)
+router.delete('/:id', authMiddleware, deleteBlog);
 
 module.exports = router;
