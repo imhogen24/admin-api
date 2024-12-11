@@ -1,0 +1,103 @@
+
+POST http://localhost:5000/api/services
+Content-Type: application/json
+
+{
+    "organizationDetails": {
+        "name": "EcoSoap Industries Ltd.",
+        "contactPerson": "Mr. Emmanuel Asare",
+        "email": "emmanuel.asare@ecosoap.com",
+        "phone": "+233 24 123 4567",
+        "address": "Plot 45, Industrial Area, Accra, Ghana"
+    },
+    "businessOverview": {
+        "description": "EcoSoap Industries Ltd. specializes in the production of eco-friendly soaps using sustainable materials sourced from local farmers.",
+        "primaryPurpose": "To streamline the mixing and curing stages of soap production to reduce lead times and improve product consistency"
+    },
+    "currentProcess": {
+        "existingSystem": {
+            "description": "Currently, soap production involves manual mixing, hand pouring into molds, and air curing in a temperature-controlled room",
+            "purpose": "Manufacturing of soap bars in small batches"
+        },
+        "keyMetrics": {
+            "throughput": 300,
+            "efficiency": 70,
+            "errorRate": 5
+        }
+    },
+    "challenges": {
+        "painPoints": [
+            "Low efficiency",
+            "High operating costs",
+            "Low output",
+            "Quality issues"
+        ],
+        "specificIssues": [
+            "Manual mixing leads to inconsistent soap texture",
+            "High labor costs due to reliance on manual work",
+            "Limited production capacity due to small batch sizes"
+        ]
+    },
+    "improvements": {
+        "goals": [
+            "Increased efficiency",
+            "Reduced costs",
+            "Enhanced quality",
+            "Higher output"
+        ],
+        "performanceTargets": {
+            "throughput": "Increase throughput to 600 bars/day",
+            "defectRate": "Reduce defect rate to below 2%"
+        }
+    },
+    "functionalRequirements": {
+        "keyFunctions": [
+            "Automated mixing and pouring of soap",
+            "Temperature-controlled curing"
+        ],
+        "materialIntroduction": "Manually",
+        "specialRequirements": [
+            "Noise reduction for indoor operations",
+            "Safety guards around moving parts"
+        ]
+    },
+    "spaceAndPower": {
+        "spaceAvailable": "10m x 8m",
+        "powerSupply": "240V, single-phase, 10HP available",
+        "environmentalConditions": "Indoor use in a temperature-controlled environment (~22°C)"
+    },
+    "scalability": {
+        "anticipateFutureGrowth": true,
+        "growthAccommodation": "Modular design for easy capacity expansion",
+        "comparableSystems": "Observed an automated soap production system at GreenGlow Enterprises during a site visit in May 2024"
+    },
+    "additionalInfo": {
+        "collaborationPreferences": [
+            "Regular Meetings",
+            "Weekly Updates via Email"
+        ],
+        "otherComments": "The system should be designed to integrate with a future packaging automation process"
+    },
+    "declaration": {
+        "signedBy": "Emmanuel Asare"
+    }
+}
+
+# ### Get All Client Inquiries
+# GET http://localhost:3000/api/client-inquiries
+
+# ### Get Single Client Inquiry
+# GET http://localhost:3000/api/client-inquiries/{{clientInquiryId}}
+
+# ### Update Client Inquiry
+# PUT http://localhost:3000/api/client-inquiries/{{clientInquiryId}}
+# Content-Type: application/json
+
+# {
+#     "improvements": {
+#         "goals": ["Increased efficiency"]
+#     }
+# }
+
+### Delete Client Inquiry
+DELETE http://localhost:3000/api/client-inquiries/{{clientInquiryId}}
