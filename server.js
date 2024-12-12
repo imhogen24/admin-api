@@ -2,11 +2,11 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const connectDB = require('../config/db');
-const processRoutes = require('../routes/processRoutes');
-const cadRoutes = require('../routes/cadRoutes');
-const productRoutes = require('../routes/productRoutes');
-const supportRoutes = require('../routes/supportRoutes');
+const connectDB = require('./config/db');
+const processRoutes = require('./routes/processRoutes');
+const cadRoutes = require('./routes/cadRoutes');
+const productRoutes = require('./routes/productRoutes');
+const supportRoutes = require('./routes/supportRoutes');
 
 
 const app = express();
