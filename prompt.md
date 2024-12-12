@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/admin-dashboard', {
+    await mongoose.connect(process.env.MONGODB_URI,{
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
@@ -18,347 +18,266 @@ const connectDB = async () => {
 };
 
 module.exports = connectDB;
-```
-```env.js
-// nothing in it so far
+
 ```
 
 contollers dir:
-```authController.js
-const jwt = require('jsonwebtoken');
+```processController.js
 
-exports.login = async (req, res) => {
+const process = require('../models/Process');
+
+exports.createProcess = async (req, res) => {
   try {
-    const { password } = req.body;
-
-    // Check if the provided password matches the admin password in environment
-    if (password !== process.env.ADMIN_PASSWORD) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
-    // Generate JWT
-    const token = jwt.sign(
-      { role: 'admin' },
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
-    );
-
-    res.json({
-      token,
-      message: 'Login successful'
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
-```
-```blogController.js
-const Blog = require('../models/Blog');
-
-// Get all blogs
-exports.getAllBlogs = async (req, res) => {
-  try {
-    const { status } = req.query;
-    const filter = status ? { status } : {};
-
-    const blogs = await Blog.find(filter).sort({ createdAt: -1 });
-    res.status(200).json({
-      success: true,
-      count: blogs.length,
-      data: blogs
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error retrieving blogs',
-      error: error.message
-    });
-  }
-};
-
-// Create a new blog
-exports.createBlog = async (req, res) => {
-  try {
-    const { title, content, tags, status } = req.body;
-
-    // Validate required fields
-    if (!title || !content) {
-      return res.status(400).json({
-        success: false,
-        message: 'Title and content are required'
-      });
-    }
-
-    const blog = new Blog({
-      title,
-      content,
-      tags: tags || [],
-      status: status || 'draft'
-    });
-
-    const savedBlog = await blog.save();
+    const newProcess = new process(req.body);
+    const savedProcess = await newProcess.save();
 
     res.status(201).json({
-      success: true,
-      message: 'Blog created successfully',
-      data: savedBlog
+      message: 'Client Process submitted successfully',
+      process: savedProcess
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error creating blog',
+    res.status(400).json({
+      message: 'Error submitting client Process',
       error: error.message
     });
   }
 };
 
-// Update a blog
-exports.updateBlog = async (req, res) => {
+exports.getProceses = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { title, content, tags, status } = req.body;
+    const proceses = await process.find()
+      .sort({ createdAt: -1 })
+      .select('-__v'); // Exclude version key
 
-    const blog = await Blog.findById(id);
-    if (!blog) {
-      return res.status(404).json({
-        success: false,
-        message: 'Blog not found'
-      });
+    res.status(200).json(proceses);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error retrieving Proceses',
+      error: error.message
+    });
+  }
+};
+
+exports.getProcessById = async (req, res) => {
+  try {
+    const process = await process.findById(req.params.id).select('-__v');
+
+    if (!process) {
+      return res.status(404).json({ message: 'Process not found' });
     }
 
-    // Update fields
-    if (title) blog.title = title;
-    if (content) blog.content = content;
-    if (tags) blog.tags = tags;
-    if (status) blog.status = status;
-    blog.updatedAt = Date.now();
-
-    const updatedBlog = await blog.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Blog updated successfully',
-      data: updatedBlog
-    });
+    res.status(200).json(process);
   } catch (error) {
     res.status(500).json({
-      success: false,
-      message: 'Error updating blog',
+      message: 'Error retrieving Process',
       error: error.message
     });
   }
 };
 
-// Delete a blog
-exports.deleteBlog = async (req, res) => {
+exports.updateProcess = async (req, res) => {
   try {
-    const { id } = req.params;
+    const updatedProcess = await process.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
 
-    const blog = await Blog.findByIdAndDelete(id);
-    if (!blog) {
-      return res.status(404).json({
-        success: false,
-        message: 'Blog not found'
-      });
+    if (!updatedProcess) {
+      return res.status(404).json({ message: 'Process not found' });
     }
 
     res.status(200).json({
-      success: true,
-      message: 'Blog deleted successfully'
+      message: 'Process updated successfully',
+      Process: updatedProcess
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: 'Error updating Process',
+      error: error.message
+    });
+  }
+};
+
+exports.deleteProcess = async (req, res) => {
+  try {
+    const deletedProcess = await process.findByIdAndDelete(req.params.id);
+
+    if (!deletedProcess) {
+      return res.status(404).json({ message: 'Process not found' });
+    }
+
+    res.status(200).json({
+      message: 'Process deleted successfully',
+      Process: deletedProcess
     });
   } catch (error) {
     res.status(500).json({
-      success: false,
-      message: 'Error deleting blog',
+      message: 'Error deleting Process',
       error: error.message
     });
   }
 };
 ```
-```serviceContoller.js
-//nothing in it so far
-```
 
-middleware dir:
-```auth.js
-const authMiddleware = (req, res, next) => {
-  const providedPassword = req.headers['admin-password'];
+```validationMiddleware.js
+// middleware/validationMiddleware.js
+const { body, validationResult } = require('express-validator');
 
-  if (!providedPassword || providedPassword !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ message: 'Unauthorized: Invalid admin password' });
-  }
-
-  next();
+// Validation rules for client inquiry
+const processValidationRules = () => {
+  return [
+    body('organizationName').trim().notEmpty().withMessage('Organization name is required'),
+    body('contactPerson').trim().notEmpty().withMessage('Contact person is required'),
+    body('email').trim().isEmail().withMessage('Invalid email address'),
+    body('phoneNumber').optional().isMobilePhone().withMessage('Invalid phone number'),
+    body('email').normalizeEmail()
+  ];
 };
 
-module.exports = authMiddleware;
-```
+// Middleware to check validation results
+const validate = (req, res, next) => {
+  const errors = validationResult(req);
+  if (errors.isEmpty()) {
+    return next();
+  }
+  const extractedErrors = [];
+  errors.array().map(err => extractedErrors.push({ [err.path]: err.msg }));
 
-```errorHandler.js
-const errorHandler = (err, req, res, next) => {
-  console.error(err);
-
-  const statusCode = err.statusCode || 500;
-  res.status(statusCode).json({
-    success: false,
-    status: statusCode,
-    message: err.message || 'Internal Server Error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+  return res.status(422).json({
+    errors: extractedErrors
   });
 };
 
-module.exports = errorHandler;
+module.exports = {
+  processValidationRules,
+  validate
+};
+
 ```
 
 models dir:
-```Admin.js
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-
-const AdminSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  password: {
-    type: String,
-    required: true
-  }
-});
-
-// Method to check password
-AdminSchema.methods.comparePassword = async function(candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
-};
-
-// Pre-save hook to hash password
-AdminSchema.pre('save', async function(next) {
-  if (this.isModified('password')) {
-    this.password = await bcrypt.hash(this.password, 10);
-  }
-  next();
-});
-
-module.exports = mongoose.model('Admin', AdminSchema);
-```
-```Blog.js
+```Process.js
 const mongoose = require('mongoose');
 
-const BlogSchema = new mongoose.Schema({
-  title: {
+const ProcessSchema = new mongoose.Schema({
+  // Section A: Client Information
+  organizationName: { type: String, required: true },
+  contactPerson: { type: String, required: true },
+  email: { type: String, required: true, lowercase: true, trim: true },
+  phoneNumber: { type: String },
+  address: { type: String },
+
+  // Section B: Business Overview
+  businessOperations: { type: String },
+  processPurpose: { type: String },
+
+  // Section C: Current Process Overview
+  currentProcess: { type: String },
+  currentProcessPurpose: { type: String },
+  currentPerformanceMetrics: { type: String },
+
+  // Section C: Challenges
+  painPoints: [{
     type: String,
-    required: true,
-    trim: true
-  },
-  content: {
-    type: String,
-    required: true
-  },
-  author: {
-    type: String,
-    default: 'Admin'
-  },
-  status: {
-    type: String,
-    enum: ['draft', 'published'],
-    default: 'draft'
-  },
-  tags: [{
-    type: String,
-    trim: true
+    enum: [
+      'Low efficiency',
+      'High operating costs',
+      'Safety concerns',
+      'Low output',
+      'Quality issues',
+      'Other'
+    ]
   }],
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
+  specificChallenges: { type: String },
+
+  // Section D: Desired Improvements
+  improvementGoals: [{
+    type: String,
+    enum: [
+      'Increased efficiency',
+      'Reduced costs',
+      'Improved safety',
+      'Enhanced quality',
+      'Higher output',
+      'Other'
+    ]
+  }],
+  performanceTargets: { type: String },
+
+  // Section E: Functional Requirements
+  primaryFunctions: { type: String },
+  operationalNeeds: [{
+    type: String,
+    enum: ['Manually', 'Conveyor or automated systems', 'Other']
+  }],
+  specialRequirements: { type: String },
+
+  // Section F: Space and Power Constraints
+  spaceAvailability: { type: String },
+  powerSupply: { type: String },
+  environmentalFactors: { type: String },
+
+  // Section G: Scalability
+  anticipateFutureGrowth: { type: Boolean },
+  growthAccommodation: { type: String },
+  comparableSystems: { type: String },
+
+  // Section H: Additional Information
+  collaborationPreferences: [{
+    type: String,
+    enum: ['Regular Meetings', 'Weekly Updates via Email', 'On-demand Reporting']
+  }],
+  additionalComments: { type: String },
+
+  // Metadata
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
 }, {
   timestamps: true
 });
 
-module.exports = mongoose.model('Blog', BlogSchema);
-```
-```Service.js
-//nothing in so far
+module.exports = mongoose.model('process', ProcessSchema);
 ```
 
 routes dir:
-```authRoutes.js
+```processRoutes.js
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/auth');
-
-router.post('/login', (req, res) => {
-  // Simple login that just checks the admin password
-  res.status(200).json({
-    message: 'Login successful',
-    success: true
-  });
-});
-
-// Protected route example
-router.get('/protected', authMiddleware, (req, res) => {
-  res.json({
-    message: 'Access to protected route',
-    success: true
-  });
-});
-
-module.exports = router;
-```
-```blogRoutes.js
-const express = require('express');
-const router = express.Router();
-const authMiddleware = require('../middleware/auth');
+const processController = require('../controllers/processController');
 const {
-  getAllBlogs,
-  createBlog,
-  updateBlog,
-  deleteBlog
-} = require('../controllers/blogController');
+  processValidationRules,
+  validate
+} = require('../middleware/validationMiddleware');
 
-// Get all blogs (can be filtered by status)
-router.get('/', getAllBlogs);
+// Create a new client inquiry
+router.post(
+  '/',
+  processValidationRules(),
+  validate,
+  processController.createProcess
+);
 
-// Create a new blog (protected route)
-router.post('/', authMiddleware, createBlog);
+// Get all inquiries
+router.get('/', processController.getProcesses);
 
-// Update a blog (protected route)
-router.put('/:id', authMiddleware, updateBlog);
+// Get inquiry by ID
+router.get('/:id', processController.getProcessById);
 
-// Delete a blog (protected route)
-router.delete('/:id', authMiddleware, deleteBlog);
+// Update an existing inquiry
+router.put(
+  '/:id',
+  processValidationRules(),
+  validate,
+  processController.updateProcess
+);
 
-module.exports = router;
-```
-```serviceRoutes.js
-const express = require('express');
-const router = express.Router();
-
-router.get('/', (req, res) => {
-  res.status(200).json({
-    message: 'Service routes are working',
-    services: []
-  });
-});
-
-router.post('/', (req, res) => {
-  res.status(201).json({
-    message: 'Service creation route working',
-    success: true
-  });
-});
+// Delete an inquiry
+router.delete('/:id', processController.deleteProcess);
 
 module.exports = router;
 ```
-utils dir:
-```validationHelpers.js
-//nothing in there so far
-```
+
 
 ```.env
 PORT=5000
@@ -368,47 +287,43 @@ ADMIN_PASSWORD=@Ii%0245
 ```
 
 ```server.js
+// server.js
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
-require('dotenv').config();
-
-const authRoutes = require('./routes/authRoutes');
-const blogRoutes = require('./routes/blogRoutes');
-const serviceRoutes = require('./routes/serviceRoutes');
-const errorHandler = require('./middleware/errorHandler');
+const helmet = require('helmet');
+const connectDB = require('./config/db');
+const processRoutes = require('./routes/processRoutes');
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors()); // Enable CORS for all routes
+app.use(helmet()); // Add security headers
+app.use(express.json()); // Parse JSON bodies
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
-// Database Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/admin-dashboard', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB Connected Successfully'))
-.catch((err) => console.error('MongoDB connection error:', err));
+// Connect to MongoDB
+connectDB();
 
 // Routes
-app.get('/', (req, res) => {
-  res.status(200).json({
-    message: 'Admin API is running',
-    success: true
+app.use('/api/processes', processRoutes);
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    message: 'Something went wrong!',
+    error: process.env.NODE_ENV === 'production' ? {} : err.message
   });
 });
 
-app.use('/api/auth', authRoutes);
-app.use('/api/blogs', blogRoutes);
-app.use('/api/services', serviceRoutes);
-
-// Global Error Handler
-app.use(errorHandler);
-
-const PORT = process.env.PORT || 5000;
+// Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+module.exports = app;
+
 ```

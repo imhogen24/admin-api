@@ -1,43 +1,40 @@
+// server.js
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
-require('dotenv').config();
-
-const authRoutes = require('./routes/authRoutes');
-const blogRoutes = require('./routes/blogRoutes');
-const serviceRoutes = require('./routes/serviceRoutes');
-const errorHandler = require('./middleware/errorHandler');
+const helmet = require('helmet');
+const connectDB = require('./config/db');
+const processRoutes = require('./routes/processRoutes');
+const cadRoutes = require('./routes/cadRoutes');
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors()); // Enable CORS for all routes
+app.use(helmet()); // Add security headers
+app.use(express.json()); // Parse JSON bodies
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
-// Database Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/admin-dashboard', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB Connected Successfully'))
-.catch((err) => console.error('MongoDB connection error:', err));
+// Connect to MongoDB
+connectDB();
 
 // Routes
-app.get('/', (req, res) => {
-  res.status(200).json({
-    message: 'Admin API is running',
-    success: true
+app.use('/api/process', processRoutes);
+app.use('/api/cad', cadRoutes);
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    message: 'Something went wrong!',
+    error: process.env.NODE_ENV === 'production' ? {} : err.message
   });
 });
 
-app.use('/api/auth', authRoutes);
-app.use('/api/blogs', blogRoutes);
-app.use('/api/services', serviceRoutes);
-
-// Global Error Handler
-app.use(errorHandler);
-
-const PORT = process.env.PORT || 5000;
+// Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+module.exports = app;

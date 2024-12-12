@@ -1,0 +1,80 @@
+# Base URL (adjust according to your local setup)
+@baseUrl = http://localhost:5000/api/process
+@contentType = application/json
+
+### Create a New Client Inquiry
+POST {{baseUrl}}
+Content-Type: {{contentType}}
+
+{
+  "organizationName": "Tech Innovations Inc.",
+  "contactPerson": "Jane Doe",
+  "email": "jane.doe@techinnovations.com",
+  "phoneNumber": "0557685929",
+  "address": "123 Innovation Street, Tech City, TC 12345",
+  "businessOperations": "Software development and consulting",
+  "processPurpose": "Streamline client onboarding process",
+  "currentProcess": "Manual client intake and documentation",
+  "currentProcessPurpose": "Collect client information for project scoping",
+  "currentPerformanceMetrics": "Slow processing time, inconsistent data collection",
+  "painPoints": [
+    "Low efficiency",
+    "Quality issues"
+  ],
+  "specificChallenges": "Inconsistent client information gathering and long onboarding times",
+  "improvementGoals": [
+    "Increased efficiency",
+    "Enhanced quality"
+  ],
+  "performanceTargets": "Reduce onboarding time by 50% and improve data completeness",
+  "primaryFunctions": "Collect and validate client project requirements",
+  "operationalNeeds": ["Manually"],
+  "specialRequirements": "Need for standardized information collection",
+  "spaceAvailability": "Digital platform, no physical space constraints",
+  "powerSupply": "Cloud-based system, standard internet connectivity",
+  "environmentalFactors": "Web-based application, compatible with most modern browsers",
+  "anticipateFutureGrowth": true,
+  "growthAccommodation": "Scalable cloud infrastructure",
+  "comparableSystems": "Existing CRM systems, but lacking specialized project intake features",
+  "collaborationPreferences": ["Weekly Updates via Email"],
+  "additionalComments": "Looking for a comprehensive solution to improve our client onboarding process"
+}
+
+### Get All Inquiries
+GET {{baseUrl}}
+
+### Get Inquiry by ID (replace :id with an actual MongoDB _id)
+GET {{baseUrl}}/675a6db9be1a832393bc7770
+
+### Update an Existing Inquiry (replace :id with an actual MongoDB _id)
+PUT {{baseUrl}}/675a6da6be1a832393bc7760
+Content-Type: {{contentType}}
+
+{
+  "organizationName": "Tech Innovations Inc. (Updated)",
+  "specificChallenges": "Updated description of challenges",
+  "contactPerson": "Test Person",
+  "email": "mindyourbusines@email.com"
+}
+
+### Partial Update of Inquiry (replace :id with an actual MongoDB _id)
+### We do not need the PATCH since we already have put
+PATCH {{baseUrl}}/675a6db9be1a832393bc7770
+Content-Type: {{contentType}}
+
+{
+  "performanceTargets": "Reduce onboarding time by 60% and improve data completeness"
+}
+
+### Delete an Inquiry (replace :id with an actual MongoDB _id)
+DELETE {{baseUrl}}/675a6da6be1a832393bc7760
+
+### Error Handling Test - Invalid Email
+POST {{baseUrl}}
+Content-Type: {{contentType}}
+
+{
+  "organizationName": "Test Company",
+  "contactPerson": "John Doe",
+  "email": "invalid-email"
+}
