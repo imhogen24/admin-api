@@ -19,9 +19,9 @@ exports.createProcess = async (req, res) => {
 
 exports.getProceses = async (req, res) => {
   try {
-    const proceses = await Process.find()  // Use capital 'P'
+    const proceses = await Process.find()
       .sort({ createdAt: -1 })
-      .select('-__v'); // Exclude version key
+      .select('-__v'); 
 
     res.status(200).json(proceses);
   } catch (error) {

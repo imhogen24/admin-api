@@ -29,6 +29,31 @@ const cadValidationRules = () => {
   ];
 };
 
+//Product validation rules
+const productValidationRules = () => {
+    return [
+      body('organizationName').trim().notEmpty().withMessage('Organization name is required'),
+      body('contactPerson').trim().notEmpty().withMessage('Contact person is required'),
+      body('email').trim().isEmail().withMessage('Invalid email address'),
+      body('phoneNumber').optional().isMobilePhone().withMessage('Invalid phone number'),
+      body('email').normalizeEmail()
+    ];
+  };
+
+  //support validation rules
+  const supportValidationRules = () => {
+    return [
+      body('organizationName').trim().notEmpty().withMessage('Organization name is required'),
+      body('contactPerson').trim().notEmpty().withMessage('Contact person is required'),
+      body('email').trim().isEmail().withMessage('Invalid email address'),
+      body('phoneNumber').optional().isMobilePhone().withMessage('Invalid phone number'),
+      body('email').normalizeEmail(),
+      body('numberOfParticipants').optional().isInt({ min: 1 }).withMessage('Number of participants must be a positive integer'),
+      body('participantSkillLevel').optional().isIn(['Beginner', 'Intermediate', 'Advanced']).withMessage('Invalid skill level'),
+      body('trainingDeliveryMode').optional().isIn(['On-site', 'Virtual', 'Blended']).withMessage('Invalid training delivery mode'),
+      body('projectDeadline').optional().isISO8601().toDate().withMessage('Invalid date format'),
+    ];
+  };
 
 // Middleware to check validation results
 const validate = (req, res, next) => {
@@ -45,6 +70,8 @@ const validate = (req, res, next) => {
 };
 
 module.exports = {
+  supportValidationRules,
+  productValidationRules,
   processValidationRules,
   cadValidationRules,
   validate

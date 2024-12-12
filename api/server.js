@@ -1,11 +1,13 @@
-// server.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const connectDB = require('./config/db');
-const processRoutes = require('./routes/processRoutes');
-const cadRoutes = require('./routes/cadRoutes');
+const connectDB = require('../config/db');
+const processRoutes = require('../routes/processRoutes');
+const cadRoutes = require('../routes/cadRoutes');
+const productRoutes = require('../routes/productRoutes');
+const supportRoutes = require('../routes/supportRoutes');
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,6 +24,8 @@ connectDB();
 // Routes
 app.use('/api/process', processRoutes);
 app.use('/api/cad', cadRoutes);
+app.use('/api/product', productRoutes);
+app.use('/api/support', supportRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {
