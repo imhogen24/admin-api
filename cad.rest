@@ -1,0 +1,62 @@
+# Base URL (adjust according to your local setup)
+@baseUrl = http://localhost:5000/api/cad
+@contentType = application/json
+
+### Create a New Client Inquiry
+POST {{baseUrl}}
+Content-Type: {{contentType}}
+
+{
+  "organizationName": "Engineering Solutions Inc.",
+  "contactPerson": "John Smith",
+  "email": "john.smith@engineeringsolutions.com",
+  "phoneNumber": "0557685929",
+  "organizationOperations": "Mechanical engineering and product design",
+  "documentationPurpose": "Manufacturing specification for new product line",
+  "documentationTypes": ["2D Engineering Drawings", "3D Models"],
+  "fileFormats": ["CAD files", "PDF documents"],
+  "technicalSpecifications": "Detailed mechanical design for industrial equipment",
+  "technicalStandards": "ISO 9001, ASME Y14.5",
+  "preferredTimeline": "4-6 weeks",
+  "requirePeriodicDrafts": true,
+  "additionalComments": "Need high-precision technical drawings"
+}
+
+### Get All Inquiries
+GET {{baseUrl}}
+
+### Get Inquiry by ID (replace :id with an actual MongoDB _id)
+GET {{baseUrl}}/675a78df3e947aa6682ed3a8
+
+### Update an Existing Inquiry (replace :id with an actual MongoDB _id)
+PUT {{baseUrl}}/675a78df3e947aa6682ed3a8
+Content-Type: {{contentType}}
+
+{
+  "organizationName": "Tech Innovations Inc. (Updated)",
+  "specificChallenges": "Updated description of challenges",
+  "contactPerson": "Test Person",
+  "email": "mindyourbusines@email.com"
+}
+
+### Partial Update of Inquiry (replace :id with an actual MongoDB _id)
+### We do not need the PATCH since we already have put
+PATCH {{baseUrl}}/675a6db9be1a832393bc7770
+Content-Type: {{contentType}}
+
+{
+  "performanceTargets": "Reduce onboarding time by 60% and improve data completeness"
+}
+
+### Delete an Inquiry (replace :id with an actual MongoDB _id)
+DELETE {{baseUrl}}/675a78df3e947aa6682ed3a8
+
+### Error Handling Test - Invalid Email
+POST {{baseUrl}}
+Content-Type: {{contentType}}
+
+{
+  "organizationName": "Test Company",
+  "contactPerson": "John Doe",
+  "email": "invalid-email"
+}
